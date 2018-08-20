@@ -1,37 +1,37 @@
 import merge from 'deepmerge';
 import * as shvl from 'shvl';
-
+import localforage from 'localforage'
 export default function(options, storage, key) {
   options = options || {};
-  storage = options.storage || (window && window.localStorage);
+  storage = options.storage || localforage;
   key = options.key || 'vuex';
 
-  function canWriteStorage(storage) {
+  async function canWriteStorage(storage) {
     try {
-      storage.setItem('@@', 1);
-      storage.removeItem('@@');
+      await storage.setItem('@@', 1);
+      await storage.removeItem('@@');
       return true;
-    } catch (e) {}
-
-    return false;
+    } catch (err) {
+      throw err
+    }
   }
 
-  function getState(key, storage, value) {
+  async function getState(key, storage, value) {
     try {
-      return (value = storage.getItem(key)) && typeof value !== 'undefined'
+      return (value =await storage.getItem(key)) && typeof value !== 'undefined'
         ? JSON.parse(value)
         : undefined;
-    } catch (err) {}
-
-    return undefined;
+    } catch (err) {
+      throw err
+    }
   }
 
   function filter() {
     return true;
   }
 
-  function setState(key, state, storage) {
-    return storage.setItem(key, JSON.stringify(state));
+  async function setState(key, state, storage) {
+    return await storage.setItem(key, JSON.stringify(state));
   }
 
   function reducer(state, paths) {
